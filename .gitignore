@@ -1,0 +1,9 @@
+# Rootfs chroot environments
+rootfs-*/
+
+# Built packages
+*.tar.gz
+
+# System and editor files
+.DS_Store
+Thumbs.db
