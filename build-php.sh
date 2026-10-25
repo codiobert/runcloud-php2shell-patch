@@ -61,7 +61,7 @@ case "$UBU" in
   *) die "Unsupported Ubuntu: $UBU";;
 esac
 
-# Determinar versiones compatibles con $UBU según configure-command disponibles
+# Determine compatible versions with $UBU based on the available configure-command files
 declare -a COMPAT_PHP=()
 declare -a DISPLAY_PHP_MENU=()
 
@@ -71,7 +71,7 @@ for v in "${SUPPORTED_PHP[@]}"; do
     COMPAT_PHP+=("$v")
     DISPLAY_PHP_MENU+=("$v")
   else
-    DISPLAY_PHP_MENU+=("$v (no disponible en $UBU)")
+    DISPLAY_PHP_MENU+=("$v (not available on $UBU)")
   fi
 done
 
@@ -83,12 +83,12 @@ if [[ -z "$PHP_ARG" ]]; then
   PS3="PHP version: "
   select choice in "${DISPLAY_PHP_MENU[@]}"; do
     if [[ -z "$choice" ]]; then
-      warn "Opción inválida. Inténtalo de nuevo."
+      warn "Invalid option. Please try again."
       continue
     fi
-    if [[ "$choice" == *"no disponible"* ]]; then
+    if [[ "$choice" == *"not available"* ]]; then
       bad_ver=$(cut -d' ' -f1 <<< "$choice")
-      warn "PHP $bad_ver no está disponible para Ubuntu $UBU en RunCloud."
+      warn "PHP $bad_ver is not available for Ubuntu $UBU on RunCloud."
       continue
     fi
     if [[ "$choice" == all* ]]; then
@@ -119,7 +119,7 @@ else
     item="$(echo "$item" | xargs)"
     mm=$(cut -d. -f1-2 <<< "$item")
     if [[ " ${COMPAT_PHP[*]} " != *" $mm "* ]]; then
-      die "PHP $item no está disponible para Ubuntu $UBU en RunCloud. Versiones disponibles para $UBU: ${COMPAT_PHP[*]}"
+      die "PHP $item is not available for Ubuntu $UBU on RunCloud. Available versions for $UBU: ${COMPAT_PHP[*]}"
     fi
     PHP_LIST+=("$item")
   done
@@ -127,13 +127,13 @@ fi
 
 ROOTFS="$BUILD_DIR/rootfs-$UBU"
 
-# Verificar que existen los configure-commands para todas las versiones solicitadas
+# Verify that the configure commands exist for all requested versions
 for v in "${PHP_LIST[@]}"; do
   mm=$(cut -d. -f1-2 <<< "$v")
   tag=${mm/./}
   conf_file="$BUILD_DIR/configure-command/configure-php${tag}rc-${UBU}"
   if [[ ! -f "$conf_file" ]]; then
-    die "No se encontró el fichero de configuración: configure-command/configure-php${tag}rc-${UBU} (necesario para PHP $v en $UBU)."
+    die "The configuration file was not found: configure-command/configure-php${tag}rc-${UBU} (required for PHP $v on $UBU)."
   fi
 done
 
@@ -220,7 +220,7 @@ EOF
   [[ -s /usr/include/argon2.h ]] || die "argon2.h missing"
   [[ -e $ML/libargon2.so ]] || ln -sf "$(ls $ML/libargon2.so.* | head -1)" $ML/libargon2.so
   [[ -e /usr/include/gmp.h ]] || ln -sf /usr/include/x86_64-linux-gnu/gmp.h /usr/include/gmp.h
-  # compatibilidad con --with-libdir=lib64
+  # compatibility with --with-libdir=lib64
   mkdir -p /usr/lib64
   for so in /usr/lib/x86_64-linux-gnu/*.so* /usr/lib/x86_64-linux-gnu/*.a; do
     [[ -e "$so" ]] && ln -sf "$so" /usr/lib64/ 2>/dev/null || true
@@ -317,7 +317,7 @@ fi
 [[ -f /root/configure-cmd ]] || die "/root/configure-cmd not found"
 CONF_CMD=$(< /root/configure-cmd)
 
-# Adaptar OpenSSL estático si aplica
+# Adapt static OpenSSL settings if applicable
 if [[ -n "$SSL_DIR" && -d "$SSL_DIR" ]]; then
   mkdir -p /RunCloud/Packages
   ln -sfn "$SSL_DIR" /RunCloud/Packages/libssl1-rc
@@ -362,7 +362,7 @@ for v in "${PHP_LIST[@]}"; do
   mm=$(cut -d. -f1-2 <<< "$v")
   tag=${mm/./}
   conf_file="$BUILD_DIR/configure-command/configure-php${tag}rc-${UBU}"
-  [[ -f "$conf_file" ]] || die "No se encontró el fichero de configuración: $conf_file"
+  [[ -f "$conf_file" ]] || die "The configuration file was not found: $conf_file"
   cp "$conf_file" "$ROOTFS/root/configure-cmd"
 
   chroot "$ROOTFS" /usr/bin/env -i HOME=/root PATH=/usr/sbin:/usr/bin:/sbin:/bin TERM=xterm \
